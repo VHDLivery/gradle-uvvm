@@ -4,14 +4,15 @@ on:
   release:
     types: [published]
 
-permissions:
-  contents: read
-  packages: write
-
 jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
+      packages: write
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
     steps:
       - name: Check out release and UVVM submodule
         uses: actions/checkout@v6
@@ -28,7 +29,6 @@ jobs:
 
       - name: Publish to GitHub Packages
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z]+)*$ ]]; then
@@ -37,3 +37,11 @@ jobs:
           fi
           ./gradlew --no-daemon publishUvvmPublicationToGitHubPackagesRepository \
             "-PpackageVersion=${RELEASE_TAG#v}"
+
+      - name: Attach source ZIP to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$RELEASE_TAG" \
+            "build/distributions/uvvm-${RELEASE_TAG#v}-src.zip" \
+            --repo "$GITHUB_REPOSITORY"
