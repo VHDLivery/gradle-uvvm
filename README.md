@@ -26,7 +26,8 @@ Publish a GitHub Release from that commit with a tag such as `v2026.10.27`.
 The release workflow checks out the pinned UVVM revision and publishes
 `io.github.vhdlivery.uvvm:uvvm` to GitHub Packages. The Maven version is the
 release tag without its leading `v`. After publishing the Maven package, the
-workflow attaches `uvvm-<version>-src.zip` to the same GitHub Release.
+workflow attaches `uvvm-<version>-src.zip` and `uvvm-<version>.pom` to the same
+GitHub Release.
 
 ## Use with gradle-vhdlArtifacts
 

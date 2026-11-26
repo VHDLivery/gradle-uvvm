@@ -38,10 +38,12 @@ jobs:
           ./gradlew --no-daemon publishUvvmPublicationToGitHubPackagesRepository \
             "-PpackageVersion=${RELEASE_TAG#v}"
 
-      - name: Attach source ZIP to GitHub Release
+      - name: Attach source ZIP and Maven POM to GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          artifact="build/distributions/uvvm-${RELEASE_TAG#v}"
+          cp build/publications/uvvm/pom-default.xml "$artifact.pom"
           gh release upload "$RELEASE_TAG" \
-            "build/distributions/uvvm-${RELEASE_TAG#v}-src.zip" \
+            "$artifact-src.zip" "$artifact.pom" \
             --repo "$GITHUB_REPOSITORY"
