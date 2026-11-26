@@ -1,0 +1,7 @@
+import org.apache.tools.ant.DirectoryScanner
+
+rootProject.name = 'uvvm'
+
+// Preserve upstream files that Gradle's default source scan excludes.
+DirectoryScanner.removeDefaultExclude('**/.gitattributes')
+DirectoryScanner.removeDefaultExclude('**/.gitignore')

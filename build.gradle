@@ -1,0 +1,63 @@
+plugins {
+    id 'maven-publish'
+}
+
+group = 'io.github.vhdlivery.uvvm'
+version = providers.gradleProperty('packageVersion').getOrElse('0.0.0-SNAPSHOT')
+
+def uvvmSources = layout.projectDirectory.dir('upstream/uvvm')
+def requiredSources = [
+    uvvmSources.file('uvvm_util/src/func_cov_pkg.vhd').asFile,
+    uvvmSources.file('uvvm_vvc_framework/script/compile_order.txt').asFile,
+    uvvmSources.file('script/compile_all.sh').asFile
+]
+
+def srcZip = tasks.register('srcZip', Zip) {
+    archiveBaseName = project.name
+    archiveVersion = project.version.toString()
+    archiveClassifier = 'src'
+    destinationDirectory = layout.buildDirectory.dir('distributions')
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+
+    from(uvvmSources) {
+        into("uvvm-${project.version}")
+        exclude '**/.git', '**/.git/**'
+    }
+}
+
+def verifyUvvmSources = tasks.register('verifyUvvmSources') {
+    doLast {
+        if (!requiredSources.every { it.isFile() }) {
+            throw new GradleException('UVVM sources are missing. Run git submodule update --init --recursive.')
+        }
+    }
+}
+srcZip.configure { dependsOn(verifyUvvmSources) }
+
+publishing {
+    publications {
+        uvvm(MavenPublication) {
+            artifact(srcZip)
+            pom {
+                name = 'UVVM VHDL sources'
+                description = 'Complete UVVM upstream source tree packaged for Gradle VHDL consumers.'
+                url = 'https://github.com/UVVM/UVVM'
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'Build'
+            url = layout.buildDirectory.dir('repository')
+        }
+        maven {
+            name = 'GitHubPackages'
+            url = uri('https://maven.pkg.github.com/vhdlivery/gradle-uvvm')
+            credentials {
+                username = providers.environmentVariable('GITHUB_ACTOR').orNull
+                password = providers.environmentVariable('GITHUB_TOKEN').orNull
+            }
+        }
+    }
+}
