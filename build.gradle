@@ -21,7 +21,7 @@ def srcZip = tasks.register('srcZip', Zip) {
     reproducibleFileOrder = true
 
     from(uvvmSources) {
-        into("uvvm-${project.version}")
+        into("uvvm-${project.version}/uvvm")
         exclude '**/.git', '**/.git/**'
     }
 }

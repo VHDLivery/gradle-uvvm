@@ -12,7 +12,7 @@ Initialize the submodule and publish to a file-based Maven repository.
 
 ```sh
 git submodule update --init --recursive
-./gradlew publishUvvmPublicationToBuildRepository -PpackageVersion=2026.10.27
+./gradlew publishUvvmPublicationToBuildRepository -PpackageVersion=2026.10.27.1
 ```
 
 The ZIP is in `build/distributions` and the Maven repository is in
@@ -22,7 +22,7 @@ identifies the UVVM revision you have selected.
 ## Publish a release
 
 Update the submodule to the desired upstream revision and commit the gitlink.
-Publish a GitHub Release from that commit with a tag such as `v2026.10.27`.
+Publish a GitHub Release from that commit with a tag such as `v2026.10.27.1`.
 The release workflow checks out the pinned UVVM revision and publishes
 `io.github.vhdlivery.uvvm:uvvm` to GitHub Packages. The Maven version is the
 release tag without its leading `v`. After publishing the Maven package, the
@@ -38,15 +38,15 @@ version of the published release.
 
 ```groovy
 dependencies {
-    sim 'io.github.vhdlivery.uvvm:uvvm:2026.10.27'
+    sim 'io.github.vhdlivery.uvvm:uvvm:2026.10.27.1'
 }
 ```
 
 Run `./gradlew unzipSimArtifacts`. The plugin selects the `src` ZIP and strips
 its outer `uvvm-<version>/` directory, leaving the upstream tree directly in
-`build/dependency`. For example, the utility library lands at
-`build/dependency/uvvm_util`, and the full upstream compile script is
-`build/dependency/script/compile_all.sh`.
+`build/dependency/uvvm`. For example, the utility library lands at
+`build/dependency/uvvm/uvvm_util`, and the full upstream compile script is
+`build/dependency/uvvm/script/compile_all.sh`.
 
 Gradle's default file filters omit `.gitattributes` and `.gitignore` when
 extracting the ZIP. To extract these upstream files too, add this to the
@@ -57,6 +57,6 @@ org.apache.tools.ant.DirectoryScanner.removeDefaultExclude('**/.gitattributes')
 org.apache.tools.ant.DirectoryScanner.removeDefaultExclude('**/.gitignore')
 ```
 
-In `amba-pkg_axi4s`, pass `--uvvm-root build/dependency` to the existing
+In `amba-pkg_axi4s`, pass `--uvvm-root build/dependency/uvvm` to the existing
 `src/sim/scripts/run.py` VUnit runner. It reads UVVM Utility Library sources
 in the order specified by `uvvm_util/script/compile_order.txt`.
